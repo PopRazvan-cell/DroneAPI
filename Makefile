@@ -9,7 +9,7 @@ COMPOSE := docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE)
 export AGRIDRONE_UID := $(shell id -u)
 export AGRIDRONE_GID := $(shell id -g)
 
-.PHONY: help env dirs up down logs ps test lint fmt migrate mock-data openapi openapi-check gate-a0
+.PHONY: help env dirs build up down logs ps test lint fmt migrate mock-data openapi openapi-check gate-a0
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*## "}; {printf "  %-16s %s\n", $$1, $$2}'
@@ -22,8 +22,11 @@ $(ENV_FILE):
 dirs: ## Create the data/storage directories with the host user
 	mkdir -p data/store/_uploads data/synthetic data/public data/samples data/work
 
-up: env dirs ## Start the local stack and wait for healthchecks
-	$(COMPOSE) up -d --wait --wait-timeout 420
+build: env ## Rebuild the api/worker image (needed after dependency changes)
+	$(COMPOSE) build api worker
+
+up: env dirs ## Build and start the local stack, then wait for healthchecks
+	$(COMPOSE) up -d --build --wait --wait-timeout 420
 
 down: env ## Stop the local stack
 	$(COMPOSE) down --remove-orphans

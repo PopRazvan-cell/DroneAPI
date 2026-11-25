@@ -54,7 +54,8 @@ hostului (`AGRIDRONE_UID`/`AGRIDRONE_GID`, exportate de Makefile), ca scrierile 
 ## Comenzi
 
 ```bash
-make up            # pornește infrastructura și aplicația
+make build         # reconstruiește imaginea api/worker (după schimbări de dependențe)
+make up            # construiește și pornește infrastructura și aplicația
 make down          # oprește serviciile
 make logs          # logurile serviciilor
 make test          # pytest
