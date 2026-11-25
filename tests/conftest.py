@@ -28,7 +28,7 @@ def settings(tmp_path: Path) -> Settings:
         _env_file=None,
         data_dir=tmp_path / "data",
         storage_dir=tmp_path / "data" / "store",
-        database_url="postgresql+asyncpg://user:password@127.0.0.1:1/agridrone",
+        database_url="mysql+asyncmy://user:password@127.0.0.1:1/agridrone",
         redis_url="redis://127.0.0.1:1/0",
         cors_origins=["http://localhost:5173"],
     )
