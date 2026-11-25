@@ -6,10 +6,10 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.13",
-    "asyncpg>=0.29",
+    "asyncmy>=0.2.9",
     "celery[redis]>=5.4",
+    "cryptography>=42",
     "fastapi>=0.115",
-    "geoalchemy2>=0.15",
     "pydantic>=2.7",
     "pydantic-settings>=2.5",
     "redis>=5.0",

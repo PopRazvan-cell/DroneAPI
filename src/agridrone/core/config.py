@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     tus_url: str = "http://localhost:8080/files/"
     cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:5173"])
 
-    database_url: str = "postgresql+asyncpg://agridrone:agridrone@localhost:5432/agridrone"
+    database_url: str = "mysql+asyncmy://agridrone:agridrone@localhost:7102/agridrone"
     redis_url: str = "redis://localhost:6379/0"
 
     @field_validator("cors_origins", mode="before")

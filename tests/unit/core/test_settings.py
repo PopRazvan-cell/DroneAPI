@@ -17,6 +17,7 @@ def test_defaults() -> None:
     assert settings.is_prod is False
     assert settings.storage_dir == Path("./data/store")
     assert settings.data_dir == Path("./data")
+    assert settings.database_url.startswith("mysql+asyncmy://")
     assert settings.cors_origins == ["http://localhost:5173"]
     assert settings.photogrammetry_mode == "mock"
     assert settings.log_level == "INFO"
