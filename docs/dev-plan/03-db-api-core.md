@@ -38,7 +38,7 @@
 ## Criterii de acceptanță
 
 - [ ] `make migrate` creează schema pe o bază goală. `alembic downgrade base` funcționează.
-- [ ] Testele de integrare (pytest + MySQL 8.4 din docker, sau testcontainers) acoperă CRUD-ul pe ferme și parcele, importul GeoJSON și KML, și izolarea între organizații (un user din org A nu vede org B).
+- [ ] Testele de integrare (pytest + containerul MySQL existent, sau testcontainers) acoperă CRUD-ul pe ferme și parcele, importul GeoJSON și KML, și izolarea între organizații (un user din org A nu vede org B).
 - [ ] `area_ha` pentru un dreptunghi cunoscut (ex. 100 × 100 m) iese 1,00 ± 0,01.
 - [ ] Erorile ies în format problem+json.
 - [ ] `openapi/openapi.json` e generat, valid și comis.
@@ -48,7 +48,7 @@
 ```
 Implementezi pasul 03 din docs/dev-plan/03-db-api-core.md respectând docs/dev-plan/00-contracts.md.
 Începe cu schema (modele + migrare) și arată-mi-o înainte de routere.
-Folosește SQLAlchemy 2 async + driver asyncmy + FastAPI. Testele de integrare rulează pe MySQL 8.4 real.
+Folosește SQLAlchemy 2 async + driver asyncmy + FastAPI. Testele de integrare rulează pe containerul MySQL existent.
 Fără GeoAlchemy2 și fără funcții spațiale MySQL: geometriile sunt GeoJSON în coloane JSON, cu bbox_*.
 Atenție: ariile se calculează în UTM (agridrone.geo.crs.utm_crs_for), niciodată în 4326.
 ```

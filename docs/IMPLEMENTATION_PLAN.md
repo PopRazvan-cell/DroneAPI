@@ -76,7 +76,7 @@ The contract between the two developers is `openapi/openapi.json` at a tag (cont
 **Steps:** [01](dev-plan/01-repo-infra.md). **Entry:** none.
 
 **Deliverables**
-- Repo layout per contracts §2, `pyproject.toml`, `Dockerfile`, `infra/docker-compose.yml` (mysql, redis, tusd), `Makefile`, CI, pre-commit, `.env.example`.
+- Repo layout per contracts §2, `pyproject.toml`, `Dockerfile`, `infra/docker-compose.yml` (redis, tusd; MySQL is the existing host container), `Makefile`, CI, pre-commit, `.env.example`.
 - `agridrone.core` (`config`, `logging`, `classes`, `errors`); CLI with empty sub-commands; `/api/v1/healthz`, `/api/v1/meta/classes`; CORS for `http://localhost:5173`.
 
 **Definition of Done**
@@ -94,7 +94,7 @@ The contract between the two developers is `openapi/openapi.json` at a tag (cont
 | `tests/integration/test_healthz.py` | `GET /api/v1/healthz` → 200 with DB, Redis and storage status |
 | `tests/integration/test_meta_classes.py` | Returns every code from §5 |
 | `tests/integration/test_cors.py` | Preflight from `http://localhost:5173` allowed; other origins not |
-| `tests/smoke/compose_up.sh` | `docker compose up --wait` succeeds; mysql, redis, tusd healthy |
+| `tests/smoke/compose_up.sh` | `docker compose up --wait` succeeds; redis, tusd and api healthy; `/healthz` sees the existing MySQL |
 | `tests/smoke/cli_help.sh` | `agridrone --help` lists `mock analyze mission openapi db ingest demo` |
 | `agridrone openapi --check` | Committed `openapi.json` equals the generated one |
 

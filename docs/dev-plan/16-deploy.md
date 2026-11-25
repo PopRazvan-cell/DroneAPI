@@ -15,10 +15,10 @@ Internet ─► Caddy :443 (TLS automat Let's Encrypt)
               ├── /            → web     (nginx, fișiere statice)
               ├── /api/*       → api     (FastAPI + tile-uri + fișiere prin URL-uri semnate)
               └── /uploads/*   → tusd    (upload reluabil al pozelor și video-urilor)
-Rețea internă Docker (neexpusă): mysql · redis · worker (Celery) · nodeodm (profil `odm`)
+Rețea internă Docker (neexpusă): redis · worker (Celery) · nodeodm (profil `odm`)
+MySQL: container/server existent pe host, în afara acestui compose
 
 Disc: /srv/agridrone/files     ← montat în api, worker și tusd (același sistem de fișiere)
-      /srv/agridrone/mysql
 ```
 
 - Web și API sunt pe **același domeniu**, așa că în producție nu e nevoie de CORS.
@@ -40,10 +40,10 @@ Disc: /srv/agridrone/files     ← montat în api, worker și tusd (același sis
 ## Ce se construiește (`deploy/`)
 
 1. **`deploy/compose.prod.yml`:**
-   - imaginile vin din registry (GHCR), cu tag fix: `agridrone-api:${API_TAG}` (folosită de `api`, `worker` și `migrate`), `agridrone-web:${WEB_TAG}`; MySQL rulează din imaginea oficială `mysql:8.4`, cu volum persistent;
+   - imaginile vin din registry (GHCR), cu tag fix: `agridrone-api:${API_TAG}` (folosită de `api`, `worker` și `migrate`), `agridrone-web:${WEB_TAG}`; MySQL este serviciul existent de pe host (`MYSQL_HOST`/`MYSQL_PORT`), nu se pornește din compose;
    - `migrate`: serviciu one-shot (`alembic upgrade head`); `api` și `worker` pornesc numai după ce se termină cu succes (`depends_on: condition: service_completed_successfully`);
    - healthcheck pe fiecare serviciu și `restart: unless-stopped`;
-   - bind mount-uri în `/srv/agridrone/` pentru fișiere și mysql (ușor de găsit și de salvat); volume denumite pentru redis și Caddy (certificatele);
+   - bind mount-uri în `/srv/agridrone/` pentru fișiere (ușor de găsit și de salvat); volume denumite pentru redis și Caddy (certificatele);
    - `api`, `worker` și `tusd` rulează cu același UID/GID și montează `/srv/agridrone/files`;
    - `tusd` are hook-urile HTTP spre `http://api:8000/internal/tus-hooks` (rețea internă), iar Caddy blochează `/api/internal/*` din exterior;
    - rotația logurilor: driver `json-file` cu `max-size: 10m`, `max-file: 5`;

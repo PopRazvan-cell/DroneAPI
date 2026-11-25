@@ -30,9 +30,13 @@ commit + push, apoi actualizarea acestui fișier.
 - **Pasul 01** este complet la nivel de cod și configurație. În sandbox, `make up` nu a putut rula
   pentru că nu există Docker daemon; `docker compose config -q` trece. Rularea completă a stack-ului
   și verificarea `healthy` se fac pe hostul cu Docker.
-- **Baza de date:** MySQL 8.4 LTS (InnoDB, `utf8mb4`). Geometriile sunt GeoJSON (EPSG:4326, lon/lat)
+- **Baza de date:** MySQL 8.4 LTS (InnoDB, `utf8mb4`) rulează în containerul existent de pe host;
+  compose-ul nu pornește un MySQL. Conexiunea se configurează prin `MYSQL_HOST`/`MYSQL_PORT`/
+  `MYSQL_DATABASE`/`MYSQL_USER`/`MYSQL_PASSWORD`. Geometriile sunt GeoJSON (EPSG:4326, lon/lat)
   în coloane `JSON`, cu coloane `bbox_*` pentru index B-tree; fără PostGIS. Calculele metrice se fac
   în Python, în UTM.
-- Porturile publicate pe host sunt în intervalul **7100–7200**:
-  API `7100`, tusd `7101`, MySQL `7102`, Redis `7103`, NodeODM `7104`.
-  Porturile interne din containere rămân cele din contracte.
+- Pentru `make up`, `.env` trebuie să conțină datele reale ale MySQL-ului existent; stack-ul nu
+  creează baza de date și nu pornește un container MySQL.
+- Porturile publicate pe host pentru stack-ul nostru sunt în intervalul **7100–7200**:
+  API `7100`, tusd `7101`, Redis `7103`, NodeODM `7104`. MySQL folosește portul existent
+  (`MYSQL_PORT`, implicit `3306`). Porturile interne din containere rămân cele din contracte.

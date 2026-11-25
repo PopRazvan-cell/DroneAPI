@@ -26,7 +26,7 @@
    - `errors.py`: excepții de domeniu.
 4. **`agridrone/cli.py`** (typer) cu subcomenzile goale `mock`, `analyze`, `mission`, `openapi`, `db`.
 5. **`infra/docker-compose.yml`:**
-   - `mysql` (imaginea `mysql:8.4`, InnoDB, `utf8mb4`), cu volum persistent și healthcheck;
+   - MySQL **nu se pornește din compose**: API-ul și worker-ul folosesc containerul MySQL existent de pe host, prin `MYSQL_HOST`/`MYSQL_PORT` (implicit `host.docker.internal:3306`), cu `extra_hosts: host.docker.internal:host-gateway`;
    - `redis:7`;
    - `tusd` (`tusproject/tusd`): upload-uri reluabile, scrie în `${AGRIDRONE_STORAGE_DIR}/_uploads`, cu hook-uri HTTP spre API (pasul 04);
    - **fără** MinIO și fără TiTiler separat: fișierele stau pe disc, iar tile-urile le servește API-ul (pasul 11);
@@ -47,7 +47,7 @@
 
 ## Criterii de acceptanță
 
-- [x] `make up` pornește mysql, redis și tusd. Toate sunt `healthy`.
+- [x] `make up` pornește redis, tusd, api și worker; API-ul raportează MySQL existent ca `ok` în `/healthz`.
 - [x] `uv run agridrone --help` afișează subcomenzile.
 - [x] `uv run pytest` rulează și trece (cel puțin un test de smoke pe `Settings` și `classes`).
 - [x] Directorul de stocare există și e scriibil din `api`, `worker` și `tusd` (același UID în containere).

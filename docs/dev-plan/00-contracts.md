@@ -13,7 +13,7 @@
 | Tipuri | `mypy --strict` pe `agridrone/core`, `agridrone/cv`, `agridrone/geo`, `agridrone/mission` |
 | Teste | `pytest`, `pytest-asyncio`, `hypothesis` (pentru geometrie) |
 | API | FastAPI, Pydantic v2, SQLAlchemy 2 (async, driver `asyncmy`), Alembic |
-| DB | MySQL 8.4 LTS (InnoDB, `utf8mb4`) |
+| DB | MySQL 8.4 LTS (InnoDB, `utf8mb4`), container existent pe host; nu se pornește din compose |
 | Geometrii în DB | GeoJSON (EPSG:4326, lon/lat) în coloane `JSON` + coloane `bbox_*` pentru index B-tree; fără PostGIS |
 | Cozi | Celery 5 + Redis |
 | Stocare fișiere | **disc local** (sistem de fișiere), prin interfața `FileStore`. Fără S3 / MinIO |
@@ -234,7 +234,8 @@ ID-urile sunt UUID v7 (sortabile după timp), generate în aplicație.
   - nicio geometrie UTM nu trece prin API, doar GeoJSON EPSG:4326.
 - **În producție** (pasul 16): web și API stau pe același domeniu, în spatele Caddy. Web-ul apelează `/api/...` relativ, fără CORS.
 - **Porturi locale:**
-  - pe host: api `7100`, tusd `7101`, MySQL `7102`, Redis `7103`, NodeODM `7104`;
+  - pe host: api `7100`, tusd `7101`, Redis `7103`, NodeODM `7104`;
+  - MySQL este containerul existent de pe host, cu portul din `MYSQL_PORT` (implicit `3306`); nu este pornit de stack;
   - web (Vite): `5173`;
-  - în containere, porturile interne rămân cele clasice: API `8000`, tusd `8080`, MySQL `3306`,
+  - în containere, porturile interne rămân cele clasice: API `8000`, tusd `8080`,
     Redis `6379`, NodeODM `3000`. Maparea host → container se face în `infra/docker-compose.yml`.
