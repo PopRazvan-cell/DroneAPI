@@ -7,7 +7,7 @@ Frontend-ul este în repo-ul separat `agridrone-web`.
 
 - Python 3.12 (manager: [uv](https://docs.astral.sh/uv/))
 - Docker Engine + Docker Compose v2
-- MySQL 8.4 LTS existent, în container pe host (nu este pornit de acest stack; fără PostGIS)
+- MySQL 8.0+ existent, în container pe host (serverul curent rulează 8.0.44; nu este pornit de acest stack; fără PostGIS)
 - Linux sau macOS (pe macOS arm64, NodeODM rulează doar prin emulare, în profilul `odm`)
 
 ## Pornire rapidă

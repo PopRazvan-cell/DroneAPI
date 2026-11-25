@@ -61,7 +61,7 @@ Disc: /srv/agridrone/files     ← montat în api, worker și tusd (același sis
    - la eșec, revine la tag-urile anterioare (salvate în `.env.previous`).
    - Jobul de deploy în GitHub folosește un environment `production` cu aprobare manuală.
 6. **Backup (`deploy/backup.sh`, cron zilnic):**
-   - `mysqldump` comprimat (MySQL 8.4);
+   - `mysqldump` comprimat (MySQL 8.0+);
    - `restic` pe `/srv/agridrone/files` și pe dump-uri, către **altă mașină** prin SFTP (alt server, un NAS sau un disc extern). Nu e nevoie de S3; contează doar să nu fie același disc;
    - se pot exclude `_uploads/` și fișierele regenerabile (thumbnail-uri, HLS);
    - retenție 7 zilnice / 4 săptămânale / 6 lunare;

@@ -30,7 +30,7 @@ commit + push, apoi actualizarea acestui fișier.
 - **Pasul 01** este complet la nivel de cod și configurație. În sandbox, `make up` nu a putut rula
   pentru că nu există Docker daemon; `docker compose config -q` trece. Rularea completă a stack-ului
   și verificarea `healthy` se fac pe hostul cu Docker.
-- **Baza de date:** MySQL 8.4 LTS (InnoDB, `utf8mb4`) rulează în containerul existent de pe host;
+- **Baza de date:** MySQL 8.0.44 (InnoDB, `utf8mb4`) rulează în containerul existent de pe host;
   compose-ul nu pornește un MySQL. Conexiunea se configurează prin `MYSQL_HOST`/`MYSQL_PORT`/
   `MYSQL_DATABASE`/`MYSQL_USER`/`MYSQL_PASSWORD`. Geometriile sunt GeoJSON (EPSG:4326, lon/lat)
   în coloane `JSON`, cu coloane `bbox_*` pentru index B-tree; fără PostGIS. Calculele metrice se fac

@@ -13,7 +13,7 @@
 | Tipuri | `mypy --strict` pe `agridrone/core`, `agridrone/cv`, `agridrone/geo`, `agridrone/mission` |
 | Teste | `pytest`, `pytest-asyncio`, `hypothesis` (pentru geometrie) |
 | API | FastAPI, Pydantic v2, SQLAlchemy 2 (async, driver `asyncmy`), Alembic |
-| DB | MySQL 8.4 LTS (InnoDB, `utf8mb4`), container existent pe host; nu se pornește din compose |
+| DB | MySQL 8.0+ (InnoDB, `utf8mb4`; serverul existent rulează 8.0.44), container existent pe host; nu se pornește din compose |
 | Geometrii în DB | GeoJSON (EPSG:4326, lon/lat) în coloane `JSON` + coloane `bbox_*` pentru index B-tree; fără PostGIS |
 | Cozi | Celery 5 + Redis |
 | Stocare fișiere | **disc local** (sistem de fișiere), prin interfața `FileStore`. Fără S3 / MinIO |
