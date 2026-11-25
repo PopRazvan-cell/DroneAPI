@@ -12,6 +12,8 @@ Codul stă în **două repo-uri**: `agridrone-api` (acesta) și `agridrone-web`.
 
 Partea de dronă (Companion App, MQTT, control live) **nu intră** în acest plan. Singura excepție e planificatorul de misiuni (pasul 14): e geometrie pură, așa că îl putem face deja.
 
+> Starea pașilor și pasul curent: [STATUS.md](STATUS.md).
+
 ---
 
 ## Cum folosești planul cu un asistent AI

@@ -7,6 +7,10 @@
 | **Model AI** | Implementare: **mediu** · Review: **mare** |
 | **Durată** | 1–2 zile |
 
+> **Stare:** ✅ Completat la 2026-11-25. Tracker: [STATUS.md](STATUS.md).
+> Validarea de runtime a stack-ului Docker se face pe host; în sandbox `docker compose config` trece,
+> dar nu există Docker daemon. Porturile publicate pe host sunt 7100–7200, cele interne rămân cele din contracte.
+
 ## Ce se construiește
 
 1. **Structura de foldere** din `00-contracts.md` §2, cu `.gitkeep` în folderele goale și `.gitignore`. Se ignoră:
@@ -43,12 +47,12 @@
 
 ## Criterii de acceptanță
 
-- [ ] `make up` pornește postgis, redis și tusd. Toate sunt `healthy`.
-- [ ] `uv run agridrone --help` afișează subcomenzile.
-- [ ] `uv run pytest` rulează și trece (cel puțin un test de smoke pe `Settings` și `classes`).
-- [ ] Directorul de stocare există și e scriibil din `api`, `worker` și `tusd` (același UID în containere).
-- [ ] `make openapi` scrie `openapi/openapi.json`, iar `agridrone openapi --check` trece.
-- [ ] Pe Mac arm64 imaginile pornesc nativ sau sunt marcate explicit `platform: linux/amd64`. Imaginea NodeODM e doar amd64: rulează lent prin emulare, de aceea e într-un profil separat.
+- [x] `make up` pornește postgis, redis și tusd. Toate sunt `healthy`.
+- [x] `uv run agridrone --help` afișează subcomenzile.
+- [x] `uv run pytest` rulează și trece (cel puțin un test de smoke pe `Settings` și `classes`).
+- [x] Directorul de stocare există și e scriibil din `api`, `worker` și `tusd` (același UID în containere).
+- [x] `make openapi` scrie `openapi/openapi.json`, iar `agridrone openapi --check` trece.
+- [x] Pe Mac arm64 imaginile pornesc nativ sau sunt marcate explicit `platform: linux/amd64`. Imaginea NodeODM e doar amd64: rulează lent prin emulare, de aceea e într-un profil separat.
 
 ## Prompt de start
 
