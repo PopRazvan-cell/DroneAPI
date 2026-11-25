@@ -40,7 +40,7 @@ Disc: /srv/agridrone/files     ← montat în api, worker și tusd (același sis
 ## Ce se construiește (`deploy/`)
 
 1. **`deploy/compose.prod.yml`:**
-   - imaginile vin din registry (GHCR), cu tag fix: `agridrone-api:${API_TAG}` (folosită de `api`, `worker` și `migrate`), `agridrone-web:${WEB_TAG}`;
+   - imaginile vin din registry (GHCR), cu tag fix: `agridrone-api:${API_TAG}` (folosită de `api`, `worker` și `migrate`), `agridrone-web:${WEB_TAG}`; MySQL rulează din imaginea oficială `mysql:8.4`, cu volum persistent;
    - `migrate`: serviciu one-shot (`alembic upgrade head`); `api` și `worker` pornesc numai după ce se termină cu succes (`depends_on: condition: service_completed_successfully`);
    - healthcheck pe fiecare serviciu și `restart: unless-stopped`;
    - bind mount-uri în `/srv/agridrone/` pentru fișiere și mysql (ușor de găsit și de salvat); volume denumite pentru redis și Caddy (certificatele);
