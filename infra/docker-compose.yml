@@ -1,0 +1,159 @@
+name: agridrone
+
+# Host ports are mapped into 7100-7200 so this stack can coexist with other
+# containers on the same machine. Container-internal ports keep the contract values.
+
+x-app-environment: &app-environment
+  AGRIDRONE_ENV: ${AGRIDRONE_ENV:-dev}
+  AGRIDRONE_SECRET_KEY: ${AGRIDRONE_SECRET_KEY:-dev-only-change-me}
+  AGRIDRONE_DEV_TOKEN: ${AGRIDRONE_DEV_TOKEN:-dev-token}
+  AGRIDRONE_LOG_LEVEL: ${AGRIDRONE_LOG_LEVEL:-INFO}
+  AGRIDRONE_PUBLIC_URL: ${AGRIDRONE_PUBLIC_URL:-http://localhost:7100}
+  AGRIDRONE_CORS_ORIGINS: ${AGRIDRONE_CORS_ORIGINS:-http://localhost:5173}
+  AGRIDRONE_DATA_DIR: /data
+  AGRIDRONE_STORAGE_DIR: /data/store
+  AGRIDRONE_PHOTOGRAMMETRY_MODE: ${AGRIDRONE_PHOTOGRAMMETRY_MODE:-mock}
+  AGRIDRONE_NODEODM_URL: http://nodeodm:3000
+  AGRIDRONE_TUS_URL: ${AGRIDRONE_TUS_URL:-http://localhost:7101/files/}
+  AGRIDRONE_DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-agridrone}:${POSTGRES_PASSWORD:-agridrone}@postgis:5432/${POSTGRES_DB:-agridrone}
+  AGRIDRONE_REDIS_URL: redis://redis:6379/0
+
+x-app: &app
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  image: agridrone-api:local
+  user: "${AGRIDRONE_UID:-1000}:${AGRIDRONE_GID:-1000}"
+  environment: *app-environment
+  volumes:
+    - ../data:/data
+    - ../src:/app/src
+  init: true
+  restart: unless-stopped
+  depends_on:
+    postgis:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    # This tag is amd64-only; Apple Silicon runs it through emulation.
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agridrone}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agridrone}
+      POSTGRES_DB: ${POSTGRES_DB:-agridrone}
+    ports:
+      - "${POSTGRES_PORT:-7102}:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agridrone} -d ${POSTGRES_DB:-agridrone}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-7103}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  tusd:
+    image: tusproject/tusd:v2
+    command:
+      - "-upload-dir=/data/store/_uploads"
+      - "-hooks-http=http://api:8000/internal/tus-hooks"
+      - "-hooks-http-forward-headers=Authorization"
+      - "-behind-proxy"
+      - "-verbose"
+    user: "${AGRIDRONE_UID:-1000}:${AGRIDRONE_GID:-1000}"
+    ports:
+      - "${TUSD_PORT:-7101}:8080"
+    volumes:
+      - ../data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+
+  api:
+    <<: *app
+    command:
+      [
+        "uvicorn",
+        "agridrone.api.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+        "--reload-dir",
+        "/app/src",
+      ]
+    ports:
+      - "${API_PORT:-7100}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/healthz', timeout=3)",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  worker:
+    <<: *app
+    command:
+      [
+        "celery",
+        "-A",
+        "agridrone.workers.celery_app:celery_app",
+        "worker",
+        "-Q",
+        "cpu,odm,gpu",
+        "--hostname=worker@%h",
+        "--loglevel=INFO",
+      ]
+    healthcheck:
+      # $$ escapes Compose interpolation; the container shell expands $HOSTNAME.
+      test:
+        [
+          "CMD-SHELL",
+          "celery -A agridrone.workers.celery_app:celery_app inspect ping --timeout 10 -d worker@$${HOSTNAME} >/dev/null 2>&1",
+        ]
+      interval: 15s
+      timeout: 15s
+      retries: 3
+      start_period: 15s
+
+  nodeodm:
+    image: opendronemap/nodeodm:latest
+    profiles: ["odm"]
+    platform: linux/amd64
+    ports:
+      - "${NODEODM_PORT:-7104}:3000"
+    restart: unless-stopped
+
+volumes:
+  postgis_data:
+  redis_data:

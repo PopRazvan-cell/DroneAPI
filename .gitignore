@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Data and generated artifacts
+data/*
+!data/.gitkeep
+!data/synthetic/
+!data/public/
+!data/samples/
+!data/work/
+data/synthetic/*
+!data/synthetic/.gitkeep
+data/public/*
+!data/public/.gitkeep
+data/samples/*
+!data/samples/.gitkeep
+data/work/*
+!data/work/.gitkeep
+*.tif
+*.tiff
+*.onnx
+*.log
+
+# OS and editors
+.DS_Store
+*.swp
+.idea/
+.vscode/

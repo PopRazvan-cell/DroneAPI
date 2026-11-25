@@ -1,0 +1,150 @@
+{
+  "components": {
+    "schemas": {
+      "ClassInfo": {
+        "properties": {
+          "class_name": {
+            "title": "Class Name",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "integer"
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color"
+          }
+        },
+        "required": [
+          "code",
+          "class_name",
+          "color"
+        ],
+        "title": "ClassInfo",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "db": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Db",
+            "type": "string"
+          },
+          "redis": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Redis",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "degraded"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "storage": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Storage",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "db",
+          "redis",
+          "storage"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Detecția zonelor cu băltire și a golurilor din culturi, din imagini de dronă.",
+    "title": "AgriDrone API",
+    "version": "0.0.1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/healthz": {
+      "get": {
+        "operationId": "healthz_api_v1_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "One or more dependencies are down"
+          }
+        },
+        "summary": "Healthz",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/v1/meta/classes": {
+      "get": {
+        "description": "Return every class code from contracts §5.",
+        "operationId": "list_classes_api_v1_meta_classes_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClassInfo"
+                  },
+                  "title": "Response List Classes Api V1 Meta Classes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Classes",
+        "tags": [
+          "meta"
+        ]
+      }
+    }
+  }
+}
