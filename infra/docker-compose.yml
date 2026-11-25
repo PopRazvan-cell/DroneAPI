@@ -15,7 +15,7 @@ x-app-environment: &app-environment
   AGRIDRONE_PHOTOGRAMMETRY_MODE: ${AGRIDRONE_PHOTOGRAMMETRY_MODE:-mock}
   AGRIDRONE_NODEODM_URL: http://nodeodm:3000
   AGRIDRONE_TUS_URL: ${AGRIDRONE_TUS_URL:-http://localhost:7101/files/}
-  AGRIDRONE_DATABASE_URL: mysql+asyncmy://${MYSQL_USER:-agridrone}:${MYSQL_PASSWORD:-agridrone}@mysql:3306/${MYSQL_DATABASE:-agridrone}
+  AGRIDRONE_DATABASE_URL: mysql+asyncmy://${MYSQL_USER:-agridrone}:${MYSQL_PASSWORD:-agridrone}@${MYSQL_HOST:-host.docker.internal}:${MYSQL_PORT:-3306}/${MYSQL_DATABASE:-agridrone}
   AGRIDRONE_REDIS_URL: redis://redis:6379/0
 
 x-app: &app
@@ -30,39 +30,13 @@ x-app: &app
     - ../src:/app/src
   init: true
   restart: unless-stopped
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   depends_on:
-    mysql:
-      condition: service_healthy
     redis:
       condition: service_healthy
 
 services:
-  mysql:
-    image: mysql:8.4
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-agridrone}
-      MYSQL_USER: ${MYSQL_USER:-agridrone}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-agridrone}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-agridrone-root}
-    command:
-      - "--character-set-server=utf8mb4"
-      - "--collation-server=utf8mb4_0900_ai_ci"
-    ports:
-      - "${MYSQL_PORT:-7102}:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent",
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 20s
-    restart: unless-stopped
-
   redis:
     image: redis:7
     command: ["redis-server", "--appendonly", "yes"]
@@ -161,5 +135,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  mysql_data:
   redis_data:

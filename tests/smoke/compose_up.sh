@@ -14,7 +14,7 @@ mkdir -p data/store/_uploads data/synthetic data/public data/samples data/work
 
 docker compose --env-file .env -f infra/docker-compose.yml up -d --wait --wait-timeout 420
 
-for service in mysql redis tusd worker; do
+for service in redis tusd worker api; do
     container_id="$(docker compose --env-file .env -f infra/docker-compose.yml ps -q "${service}")"
     if [[ -z "${container_id}" ]]; then
         echo "Service ${service} has no container" >&2
