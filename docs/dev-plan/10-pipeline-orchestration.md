@@ -27,7 +27,7 @@
      → coregister(orthomosaic_id)                   # cpu, dacă există referință
      → terrain(orthomosaic_id)                      # cpu
      → group(analyze(orthomosaic_id, "water"), analyze(orthomosaic_id, "gaps"))   # după flight.type și season_crop
-     → persist_results(analysis_ids)                # detecții în PostGIS, parcel_stat
+     → persist_results(analysis_ids)                # detecții în MySQL, parcel_stat
      → notify(flight_id)
    ```
 4. **Tabel `job`** (sau folosește `analysis_run` + `flight.status`): `id`, `type`, `status` (`queued`|`running`|`succeeded`|`failed`), `progress`, `error`, `started_at`, `finished_at`, `params`.
@@ -41,7 +41,7 @@
 
 ## Criterii de acceptanță
 
-- [ ] `agridrone demo run --preset water` produce `analysis_run` cu `status=succeeded`, detecții în PostGIS și `parcel_stat` populat.
+- [ ] `agridrone demo run --preset water` produce `analysis_run` cu `status=succeeded`, detecții în MySQL și `parcel_stat` populat.
 - [ ] Rerularea aceluiași lanț fără `force` nu recalculează nimic (verificat prin loguri sau timp).
 - [ ] Oprirea forțată a worker-ului la jumătate, urmată de repornire, duce lanțul la final.
 - [ ] Testele de integrare rulează cu `task_always_eager=True` pentru logică și cu worker real în CI pentru un caz.

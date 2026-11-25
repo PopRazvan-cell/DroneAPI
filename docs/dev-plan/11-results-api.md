@@ -16,12 +16,12 @@
    - colormap pentru `mask` din `core/classes.py`; `dsm` cu rescale și colormap `terrain`.
 2. **Detecții:**
    - `GET /analyses/{id}/detections.geojson?class=water` (4326);
-   - opțional, vector tiles: `GET /tiles/detections/{z}/{x}/{y}.pbf` cu `ST_AsMVT`.
+   - opțional, vector tiles: `GET /tiles/detections/{z}/{x}/{y}.pbf` generate în Python (MySQL nu are `ST_AsMVT`).
 3. **Statistici și timeline:**
    - `GET /parcels/{id}/stats?metric=water_pct&from&to` → serie de timp;
    - `GET /parcels/{id}/timeline` → zboruri + analize + KPI pe fiecare;
    - `GET /farms/{id}/summary` → KPI per parcelă (ultima valoare + trend).
-4. **Comparație:** `GET /parcels/{id}/compare?a={analysis_id}&b={analysis_id}` → poligoane apărute, dispărute și persistente, cu arii (`ST_Difference`, `ST_Intersection` în UTM).
+4. **Comparație:** `GET /parcels/{id}/compare?a={analysis_id}&b={analysis_id}` → poligoane apărute, dispărute și persistente, cu arii; diferențele și intersecțiile se calculează în UTM cu Shapely/GeoPandas, în Python.
 5. **Hartă de risc multi-eveniment:** `POST /parcels/{id}/risk-map` (task) → raster cu frecvența apei pe toate analizele `water` → COG + tilejson.
 6. **Exporturi:**
    - `GET /analyses/{id}/export?format=geojson|shp|kml|csv`;
@@ -40,6 +40,6 @@
 
 ```
 Implementezi pasul 11 din docs/dev-plan/11-results-api.md respectând docs/dev-plan/00-contracts.md.
-Calculele spațiale (arii, diferențe) se fac în UTM (ST_Transform la SRID-ul UTM al parcelei).
+Calculele spațiale (arii, diferențe) se fac în UTM, cu Shapely/GeoPandas/pyproj, în Python; nu se folosesc funcții spațiale MySQL.
 La final regenerează openapi.json și listează endpoint-urile noi.
 ```

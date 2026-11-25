@@ -76,7 +76,7 @@ The contract between the two developers is `openapi/openapi.json` at a tag (cont
 **Steps:** [01](dev-plan/01-repo-infra.md). **Entry:** none.
 
 **Deliverables**
-- Repo layout per contracts §2, `pyproject.toml`, `Dockerfile`, `infra/docker-compose.yml` (postgis, redis, tusd), `Makefile`, CI, pre-commit, `.env.example`.
+- Repo layout per contracts §2, `pyproject.toml`, `Dockerfile`, `infra/docker-compose.yml` (mysql, redis, tusd), `Makefile`, CI, pre-commit, `.env.example`.
 - `agridrone.core` (`config`, `logging`, `classes`, `errors`); CLI with empty sub-commands; `/api/v1/healthz`, `/api/v1/meta/classes`; CORS for `http://localhost:5173`.
 
 **Definition of Done**
@@ -94,7 +94,7 @@ The contract between the two developers is `openapi/openapi.json` at a tag (cont
 | `tests/integration/test_healthz.py` | `GET /api/v1/healthz` → 200 with DB, Redis and storage status |
 | `tests/integration/test_meta_classes.py` | Returns every code from §5 |
 | `tests/integration/test_cors.py` | Preflight from `http://localhost:5173` allowed; other origins not |
-| `tests/smoke/compose_up.sh` | `docker compose up --wait` succeeds; postgis, redis, tusd healthy |
+| `tests/smoke/compose_up.sh` | `docker compose up --wait` succeeds; mysql, redis, tusd healthy |
 | `tests/smoke/cli_help.sh` | `agridrone --help` lists `mock analyze mission openapi db ingest demo` |
 | `agridrone openapi --check` | Committed `openapi.json` equals the generated one |
 
@@ -174,7 +174,7 @@ The contract between the two developers is `openapi/openapi.json` at a tag (cont
 **Steps:** [03](dev-plan/03-db-api-core.md), [14](dev-plan/14-mission-planner.md). **Entry:** A0 gate (14 also needs `geo.crs` from A1).
 
 **Deliverables**
-- PostGIS schema + Alembic, routers for orgs/farms/parcels/crops/flights, GeoJSON/KML/SHP import, dev auth, org isolation, problem+json.
+- MySQL schema + Alembic, routers for orgs/farms/parcels/crops/flights, GeoJSON/KML/SHP import, dev auth, org isolation, problem+json.
 - `agridrone.mission` (`camera`, `grid`, `estimate`, `export`) and `/missions` endpoints.
 - `agridrone db seed` with the demo farm. Tag `v0.1.0`. **H1 delivered.**
 
@@ -230,7 +230,7 @@ The contract between the two developers is `openapi/openapi.json` at a tag (cont
 | `tests/integration/ingest/test_dedup.py` | Re-upload creates no duplicates |
 | `tests/integration/ingest/test_rejects.py` | No-GPS photo accepted with warning; non-media rejected with reason |
 | `tests/integration/photogrammetry/test_mock_engine.py` | Synthetic flight → ortho + DSM at contract keys in < 10 s |
-| `tests/integration/pipeline/test_chain_eager.py` | `status=succeeded`, detections in PostGIS, `parcel_stat` populated |
+| `tests/integration/pipeline/test_chain_eager.py` | `status=succeeded`, detections in MySQL, `parcel_stat` populated |
 | `tests/integration/pipeline/test_idempotent.py` | Re-run without `force` recomputes nothing |
 | `tests/integration/pipeline/test_worker_restart.py` (real worker) | Killed mid-chain, restarted, chain completes |
 | `tests/integration/pipeline/test_ws_jobs.py` | `/ws/jobs` emits progress events matching the published schema |

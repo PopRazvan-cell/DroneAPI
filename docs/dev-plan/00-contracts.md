@@ -12,8 +12,9 @@
 | Lint / format | `ruff` (line-length 110), `ruff format` |
 | Tipuri | `mypy --strict` pe `agridrone/core`, `agridrone/cv`, `agridrone/geo`, `agridrone/mission` |
 | Teste | `pytest`, `pytest-asyncio`, `hypothesis` (pentru geometrie) |
-| API | FastAPI, Pydantic v2, SQLAlchemy 2 (async) + GeoAlchemy2, Alembic |
-| DB | PostgreSQL 16 + PostGIS 3 |
+| API | FastAPI, Pydantic v2, SQLAlchemy 2 (async, driver `asyncmy`), Alembic |
+| DB | MySQL 8.4 LTS (InnoDB, `utf8mb4`) |
+| Geometrii în DB | GeoJSON (EPSG:4326, lon/lat) în coloane `JSON` + coloane `bbox_*` pentru index B-tree; fără PostGIS |
 | Cozi | Celery 5 + Redis |
 | Stocare fișiere | **disc local** (sistem de fișiere), prin interfața `FileStore`. Fără S3 / MinIO |
 | Upload-uri mari | protocolul **tus** (reluabil): serverul `tusd` + Uppy în web |
@@ -80,6 +81,11 @@ agridrone-api/
   - EPSG:32634 (UTM 34N) pentru vest.
 - **Rasterele** procesate se salvează în CRS-ul UTM al parcelei.
 - **Interzis:** `geom.area` sau `buffer()` pe geometrii în 4326.
+- **MySQL:** nu există PostGIS. Geometriile se stochează ca GeoJSON (EPSG:4326, lon/lat) în coloane
+  `JSON`, însoțite de coloane `bbox_min_lon`, `bbox_min_lat`, `bbox_max_lon`, `bbox_max_lat` pentru
+  filtre și index B-tree. Toate calculele metrice (arii, buffere, intersecții, diferențe) se fac în
+  Python, cu Shapely/GeoPandas/pyproj, în CRS proiectat UTM. Nu se folosesc funcții spațiale MySQL
+  pentru arii sau distanțe.
 - **Locația implicită a datelor sintetice:** centrul parcelei la `lat=44.55, lon=27.10` (Bărăgan, UTM 35N).
 
 ## 4. Formate de date
@@ -90,7 +96,7 @@ agridrone-api/
 | DSM / DTM | COG GeoTIFF, 1 bandă `float32`, metri, `nodata = -9999` |
 | Mască de clase | COG GeoTIFF, 1 bandă `uint8`, coduri din §5, `nodata = 0` |
 | Probabilități | COG GeoTIFF `uint8` (0–255 = 0–1), câte o bandă pe clasă |
-| Detecții | GeoJSON (EPSG:4326) cu proprietățile din §6 + tabel PostGIS |
+| Detecții | GeoJSON (EPSG:4326) cu proprietățile din §6 + tabel MySQL (geometrie JSON + bbox) |
 | Parcele (import) | GeoJSON / KML / Shapefile (zip) |
 
 ## 5. Coduri de clase (identice în măști, ML, DB și frontend)
@@ -228,6 +234,7 @@ ID-urile sunt UUID v7 (sortabile după timp), generate în aplicație.
   - nicio geometrie UTM nu trece prin API, doar GeoJSON EPSG:4326.
 - **În producție** (pasul 16): web și API stau pe același domeniu, în spatele Caddy. Web-ul apelează `/api/...` relativ, fără CORS.
 - **Porturi locale:**
-  - api: `8000`;
-  - tusd: `8080`;
-  - web (Vite): `5173`.
+  - pe host: api `7100`, tusd `7101`, MySQL `7102`, Redis `7103`, NodeODM `7104`;
+  - web (Vite): `5173`;
+  - în containere, porturile interne rămân cele clasice: API `8000`, tusd `8080`, MySQL `3306`,
+    Redis `6379`, NodeODM `3000`. Maparea host → container se face în `infra/docker-compose.yml`.

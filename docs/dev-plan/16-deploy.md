@@ -15,10 +15,10 @@ Internet ─► Caddy :443 (TLS automat Let's Encrypt)
               ├── /            → web     (nginx, fișiere statice)
               ├── /api/*       → api     (FastAPI + tile-uri + fișiere prin URL-uri semnate)
               └── /uploads/*   → tusd    (upload reluabil al pozelor și video-urilor)
-Rețea internă Docker (neexpusă): postgis · redis · worker (Celery) · nodeodm (profil `odm`)
+Rețea internă Docker (neexpusă): mysql · redis · worker (Celery) · nodeodm (profil `odm`)
 
 Disc: /srv/agridrone/files     ← montat în api, worker și tusd (același sistem de fișiere)
-      /srv/agridrone/postgres
+      /srv/agridrone/mysql
 ```
 
 - Web și API sunt pe **același domeniu**, așa că în producție nu e nevoie de CORS.
@@ -43,7 +43,7 @@ Disc: /srv/agridrone/files     ← montat în api, worker și tusd (același sis
    - imaginile vin din registry (GHCR), cu tag fix: `agridrone-api:${API_TAG}` (folosită de `api`, `worker` și `migrate`), `agridrone-web:${WEB_TAG}`;
    - `migrate`: serviciu one-shot (`alembic upgrade head`); `api` și `worker` pornesc numai după ce se termină cu succes (`depends_on: condition: service_completed_successfully`);
    - healthcheck pe fiecare serviciu și `restart: unless-stopped`;
-   - bind mount-uri în `/srv/agridrone/` pentru fișiere și postgres (ușor de găsit și de salvat); volume denumite pentru redis și Caddy (certificatele);
+   - bind mount-uri în `/srv/agridrone/` pentru fișiere și mysql (ușor de găsit și de salvat); volume denumite pentru redis și Caddy (certificatele);
    - `api`, `worker` și `tusd` rulează cu același UID/GID și montează `/srv/agridrone/files`;
    - `tusd` are hook-urile HTTP spre `http://api:8000/internal/tus-hooks` (rețea internă), iar Caddy blochează `/api/internal/*` din exterior;
    - rotația logurilor: driver `json-file` cu `max-size: 10m`, `max-file: 5`;
@@ -61,7 +61,7 @@ Disc: /srv/agridrone/files     ← montat în api, worker și tusd (același sis
    - la eșec, revine la tag-urile anterioare (salvate în `.env.previous`).
    - Jobul de deploy în GitHub folosește un environment `production` cu aprobare manuală.
 6. **Backup (`deploy/backup.sh`, cron zilnic):**
-   - `pg_dump` comprimat;
+   - `mysqldump` comprimat (MySQL 8.4);
    - `restic` pe `/srv/agridrone/files` și pe dump-uri, către **altă mașină** prin SFTP (alt server, un NAS sau un disc extern). Nu e nevoie de S3; contează doar să nu fie același disc;
    - se pot exclude `_uploads/` și fișierele regenerabile (thumbnail-uri, HLS);
    - retenție 7 zilnice / 4 săptămânale / 6 lunare;

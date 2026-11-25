@@ -26,7 +26,7 @@
    - `errors.py`: excepții de domeniu.
 4. **`agridrone/cli.py`** (typer) cu subcomenzile goale `mock`, `analyze`, `mission`, `openapi`, `db`.
 5. **`infra/docker-compose.yml`:**
-   - `postgis` (imaginea `postgis/postgis:16-3.4`);
+   - `mysql` (imaginea `mysql:8.4`, InnoDB, `utf8mb4`), cu volum persistent și healthcheck;
    - `redis:7`;
    - `tusd` (`tusproject/tusd`): upload-uri reluabile, scrie în `${AGRIDRONE_STORAGE_DIR}/_uploads`, cu hook-uri HTTP spre API (pasul 04);
    - **fără** MinIO și fără TiTiler separat: fișierele stau pe disc, iar tile-urile le servește API-ul (pasul 11);
@@ -47,7 +47,7 @@
 
 ## Criterii de acceptanță
 
-- [x] `make up` pornește postgis, redis și tusd. Toate sunt `healthy`.
+- [x] `make up` pornește mysql, redis și tusd. Toate sunt `healthy`.
 - [x] `uv run agridrone --help` afișează subcomenzile.
 - [x] `uv run pytest` rulează și trece (cel puțin un test de smoke pe `Settings` și `classes`).
 - [x] Directorul de stocare există și e scriibil din `api`, `worker` și `tusd` (același UID în containere).

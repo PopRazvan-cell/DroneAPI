@@ -30,6 +30,9 @@ commit + push, apoi actualizarea acestui fișier.
 - **Pasul 01** este complet la nivel de cod și configurație. În sandbox, `make up` nu a putut rula
   pentru că nu există Docker daemon; `docker compose config -q` trece. Rularea completă a stack-ului
   și verificarea `healthy` se fac pe hostul cu Docker.
+- **Baza de date:** MySQL 8.4 LTS (InnoDB, `utf8mb4`). Geometriile sunt GeoJSON (EPSG:4326, lon/lat)
+  în coloane `JSON`, cu coloane `bbox_*` pentru index B-tree; fără PostGIS. Calculele metrice se fac
+  în Python, în UTM.
 - Porturile publicate pe host sunt în intervalul **7100–7200**:
-  API `7100`, tusd `7101`, PostGIS `7102`, Redis `7103`, NodeODM `7104`.
+  API `7100`, tusd `7101`, MySQL `7102`, Redis `7103`, NodeODM `7104`.
   Porturile interne din containere rămân cele din contracte.

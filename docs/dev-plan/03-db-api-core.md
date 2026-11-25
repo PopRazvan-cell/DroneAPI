@@ -9,15 +9,15 @@
 
 ## Ce se construiește
 
-1. **Modele SQLAlchemy** (`agridrone/db/models.py`). Geometriile sunt GeoAlchemy2 în 4326:
+1. **Modele SQLAlchemy** (`agridrone/db/models.py`). Geometriile sunt GeoJSON (EPSG:4326, lon/lat) în coloane `JSON`, cu coloane `bbox_*` pentru filtre și index B-tree. Calculele metrice se fac în Python, în UTM:
    - `organization`, `user` (cu `role`: `admin`, `agronomist`, `pilot`, `viewer`);
-   - `farm` (`org_id`, `name`, `location` Point);
-   - `parcel` (`farm_id`, `name`, `geom` MultiPolygon, `area_ha` calculat în UTM, `apia_code`, `notes`);
+   - `farm` (`org_id`, `name`, `location` JSON Point);
+   - `parcel` (`farm_id`, `name`, `geom` JSON MultiPolygon, `bbox_min_lon`, `bbox_min_lat`, `bbox_max_lon`, `bbox_max_lat`, `area_ha` calculat în UTM, `apia_code`, `notes`);
    - `season_crop` (`parcel_id`, `season`, `crop`, `sowing_date`, `target_density_per_ha`, `row_spacing_m`);
    - `flight` (`parcel_id`, `flown_at`, `type`: `post_rain` | `routine` | `reference_dry`, `altitude_m`, `status`, `notes`);
-   - `media_asset`, `orthomosaic`, `analysis_run`, `detection`, `parcel_stat`: doar schema aici; se populează în pașii 04–11;
+   - `media_asset`, `orthomosaic`, `analysis_run`, `detection` (geom JSON + bbox), `parcel_stat`: doar schema aici; se populează în pașii 04–11;
    - `weather_event` (`farm_id`, `start`, `end`, `precip_mm`, `source`).
-2. **Migrare Alembic inițială**, cu index GiST pe toate geometriile.
+2. **Migrare Alembic inițială**, cu index B-tree pe coloanele `bbox_*` ale geometriilor (MySQL nu are GiST/PostGIS).
 3. **Routere `api/v1`:**
    - `GET/POST /farms`, `GET/PATCH/DELETE /farms/{id}`;
    - `GET/POST /parcels`, `GET/PATCH/DELETE /parcels/{id}`, cu filtru `farm_id` și `bbox`;
@@ -38,7 +38,7 @@
 ## Criterii de acceptanță
 
 - [ ] `make migrate` creează schema pe o bază goală. `alembic downgrade base` funcționează.
-- [ ] Testele de integrare (pytest + Postgres din docker, sau testcontainers) acoperă CRUD-ul pe ferme și parcele, importul GeoJSON și KML, și izolarea între organizații (un user din org A nu vede org B).
+- [ ] Testele de integrare (pytest + MySQL 8.4 din docker, sau testcontainers) acoperă CRUD-ul pe ferme și parcele, importul GeoJSON și KML, și izolarea între organizații (un user din org A nu vede org B).
 - [ ] `area_ha` pentru un dreptunghi cunoscut (ex. 100 × 100 m) iese 1,00 ± 0,01.
 - [ ] Erorile ies în format problem+json.
 - [ ] `openapi/openapi.json` e generat, valid și comis.
@@ -48,7 +48,8 @@
 ```
 Implementezi pasul 03 din docs/dev-plan/03-db-api-core.md respectând docs/dev-plan/00-contracts.md.
 Începe cu schema (modele + migrare) și arată-mi-o înainte de routere.
-Folosește SQLAlchemy 2 async + GeoAlchemy2 + FastAPI. Testele de integrare rulează pe PostGIS real.
+Folosește SQLAlchemy 2 async + driver asyncmy + FastAPI. Testele de integrare rulează pe MySQL 8.4 real.
+Fără GeoAlchemy2 și fără funcții spațiale MySQL: geometriile sunt GeoJSON în coloane JSON, cu bbox_*.
 Atenție: ariile se calculează în UTM (agridrone.geo.crs.utm_crs_for), niciodată în 4326.
 ```
 
